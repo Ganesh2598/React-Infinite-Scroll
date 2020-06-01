@@ -5,7 +5,7 @@ import Intersection from "./Component/Intersection"
 function App() {
   return (
     <div className="App">
-      <Intersection onVisible = {() => console.log("Visisble")}/>
+      <Intersection/>
     </div>
   );
 }

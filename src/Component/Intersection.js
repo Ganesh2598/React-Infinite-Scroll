@@ -1,4 +1,6 @@
 import React, {Component} from 'react'
+var randomwords = require("random-words");
+
 //import ReactDOM from 'react-dom'
 
 
@@ -6,41 +8,34 @@ class Intersection extends Component{
     constructor(){
         super();
         this.state = {
-            imageUrl1 : [],
-            imageUrl2 : []
+            imageUrl1 : []
         }
+        this.observer = "";
     }
     ref = React.createRef();
 
     onVisible = () =>{
 
-        fetch("https://api.giphy.com/v1/gifs/random?api_key=afbs0gTjlIUyimEkjgPpJsj5nfqj3he3")
+        fetch(`https://api.giphy.com/v1/gifs/search?q=${randomwords()}&api_key=afbs0gTjlIUyimEkjgPpJsj5nfqj3he3&limit=5`)
         .then(response => response.json())
         .then(content =>{
             //console.log(content.data.images.original.url)
-            const image1 = [...this.state.imageUrl1,content.data.images.original.url]
+            if (!content) {
+                this.observer.disconnect();
+            }
+            const newData = content.data.map(obj => obj.images.original.url)
+            const image1 = [...this.state.imageUrl1,...newData]
             this.setState({
                 imageUrl1 : image1
             })
         })
-
-        fetch("https://api.giphy.com/v1/gifs/random?api_key=afbs0gTjlIUyimEkjgPpJsj5nfqj3he3")
-        .then(response => response.json())
-        .then(content =>{
-            //console.log(content.data.images.original.url)
-            const image2 = [...this.state.imageUrl2,content.data.images.original.url]
-            this.setState({
-                imageUrl2 : image2
-            })
-        })
-
-        
     }
 
     componentDidMount(){
-        this.onVisible()
-        const observer = new IntersectionObserver(([entry]) =>{
-            if (entry.isIntersecting){
+        this.observer = new IntersectionObserver(([entry]) =>{
+            //console.log(randomwords())
+            if (entry.intersectionRatio>0){
+                this.onVisible()
                 this.onVisible()
             }
         },{
@@ -51,7 +46,7 @@ class Intersection extends Component{
 
         if (this.ref.current){
             //console.log("intersecting")
-            observer.observe(this.ref.current)
+            this.observer.observe(this.ref.current)
         }
     }
 
@@ -65,9 +60,8 @@ class Intersection extends Component{
                     {
                         this.state.imageUrl1.map(
                             (url,index) =>{
-                                return <div key={index}>
+                                return <div key={ index }>
                                     <img src = { url } alt = "Please Wait" />
-                                    <img src = { this.state.imageUrl2[index] } alt = "Please wait"/>
                                 </div>
                             }
                         )
